@@ -18,4 +18,6 @@ const (
 	dogodek
 )
 
-
+func (classStatus ClassStatus) getClassStatus() string {
+	return [...]string{"nadomescanje", "zaposlitev", "odpadlaUra", "vecSkupin", "dogodek"}[classStatus-1]
+}

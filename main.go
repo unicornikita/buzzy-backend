@@ -1,14 +1,11 @@
 package main
 
 import (
+	"buzzy-backend/models"
 	"fmt"
 )
 
-func (classStatus ClassStatus) getClassStatus() string {
-	return [...]string{"nadomescanje", "zaposlitev", "odpadlaUra", "vecSkupin", "dogodek"}[classStatus-1]
-}
-
-var scheduleTable [9][6]WeeklySchedule = [9][6]WeeklySchedule{}
+var scheduleTable [9][6]models.WeeklySchedule = [9][6]models.WeeklySchedule{}
 
 func main() {
 	fmt.Println("Hello, World!")
