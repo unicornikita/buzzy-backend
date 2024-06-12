@@ -5,7 +5,7 @@ type DailySchedule struct {
 	Classroom      string
 	Professor      string
 	ClassDuration  ClassDuration
-	ClassStatusInt ClassStatus
+	ClassStatusInt *ClassStatus
 }
 
 type ClassStatus int
@@ -17,7 +17,3 @@ const (
 	vecSkupin
 	dogodek
 )
-
-func (classStatus ClassStatus) getClassStatus() string {
-	return [...]string{"nadomescanje", "zaposlitev", "odpadlaUra", "vecSkupin", "dogodek"}[classStatus-1]
-}
