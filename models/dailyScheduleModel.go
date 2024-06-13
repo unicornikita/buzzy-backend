@@ -1,19 +1,6 @@
 package models
 
 type DailySchedule struct {
-	ClassName      string
-	Classroom      string
-	Professor      string
-	ClassDuration  ClassDuration
-	ClassStatusInt *ClassStatus
+	DailySchedule []ClassSubject
+	DayOfTheWeek  string
 }
-
-type ClassStatus int
-
-const (
-	nadomescanje = iota
-	zaposlitev
-	odpadlaUra
-	vecSkupin
-	dogodek
-)

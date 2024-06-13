@@ -204,5 +204,7 @@ func main() {
 	// subtract 1 because today on index 0 would be Sunday
 	today := int(time.Now().Weekday()) - 1
 	fmt.Println(today, time.Now().Weekday().String())
-	printDailySchedule(weeklySchedule.WeeklySchedule[today-1])
+	printDailySchedule(weeklySchedule.WeeklySchedule[today-2])
+
+	//TODO: separate two-subject classes
 }
