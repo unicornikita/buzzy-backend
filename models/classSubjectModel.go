@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 )
 
 type ClassSubject struct {
@@ -10,6 +11,7 @@ type ClassSubject struct {
 	Professor      string
 	ClassDuration  ClassDuration
 	ClassStatusInt *ClassStatus
+	SubClasses     *[]ClassSubject // for classes with two subjects happening at the same time
 }
 
 type ClassStatus int
@@ -31,7 +33,7 @@ var classStatusMap = map[string]ClassStatus{
 }
 
 func (status ClassStatus) String() string {
-	return [...]string{"Nadomeščanje", "Zaposlitev", "Odpadla Ura", "Več skupin", "Dogodek"}[status]
+	return [...]string{"Nadomeščanje", "Zaposlitev", "Odpadla ura", "Več skupin", "Dogodek"}[status]
 }
 
 func ParseClassStatus(status string) (ClassStatus, error) {
@@ -39,4 +41,15 @@ func ParseClassStatus(status string) (ClassStatus, error) {
 		return val, nil
 	}
 	return 0, errors.New("invalid OrderStatus: " + status)
+}
+
+func PrintSubjectInfo(classSubject ClassSubject, classSubjectDuration string, statusInt *ClassStatus) string {
+	return fmt.Sprintf(
+		"Class Name: %s\nClassroom: %s\nProfessor: %s\nDuration: %s\nStatus: %s\n",
+		classSubject.ClassName,
+		classSubject.Classroom,
+		classSubject.Professor,
+		classSubjectDuration,
+		statusInt,
+	)
 }
