@@ -73,3 +73,12 @@ func FormatDurationPrint(duration models.ClassDuration) string {
 		duration.EndTime.Minute(),
 	)
 }
+
+func PrintWeeklySchedule(schedule models.WeeklySchedule) {
+	for dailySchedule := range schedule.WeeklySchedule {
+		selectedSchedule := schedule.WeeklySchedule[dailySchedule]
+		PrintDailySchedule(selectedSchedule)
+		fmt.Println("------")
+	}
+
+}

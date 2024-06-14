@@ -26,6 +26,7 @@ func getWeeklySchedule(url string) models.WeeklySchedule { //TODO: add string cl
 		}
 
 		weeklySchedule.WeeklySchedule = dailySchedule
+		utils.PrintWeeklySchedule(weeklySchedule)
 	})
 
 	collector.Visit(url)
@@ -121,10 +122,8 @@ func getDailySchedule(element *colly.HTMLElement, dayOfTheWeekIndex int, duratio
 
 func main() {
 	url := "https://www.easistent.com/urniki/5738623c4f3588f82583378c44ceb026102d6bae/razredi/523573"
-	weeklySchedule := getWeeklySchedule(url)
+	getWeeklySchedule(url)
 	// subtract 1 because today on index 0 would be Sunday
-	today := int(time.Now().Weekday()) - 1
-	utils.PrintDailySchedule(weeklySchedule.WeeklySchedule[today])
 
 	//TODO: separate two-subject classes
 
