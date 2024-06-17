@@ -3,11 +3,14 @@ package main
 import (
 	"buzzy-backend/models"
 	"buzzy-backend/utils"
+	"log"
+	"net/url"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
+	"github.com/gofiber/fiber/v2"
 )
 
 func getWeeklySchedule(url string) models.WeeklySchedule { //TODO: add string classURL as parameter
@@ -120,9 +123,32 @@ func getDailySchedule(element *colly.HTMLElement, dayOfTheWeekIndex int, duratio
 
 }
 
+func urlDecode(classURL string) string {
+	query, err := url.QueryUnescape(classURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return query
+}
+
 func main() {
-	url := "https://www.easistent.com/urniki/5738623c4f3588f82583378c44ceb026102d6bae/razredi/523573"
-	getWeeklySchedule(url)
+	app := fiber.New()
+	app.Get("/schedule/:value", func(c *fiber.Ctx) error {
+		classURL := urlDecode(c.Params("value"))
+		schedule := getWeeklySchedule(classURL)
+		return c.JSON(schedule)
+	})
+
+	/*
+		app.Get("/", func(c *fiber.Ctx) error {
+			url := "https://www.easistent.com/urniki/5738623c4f3588f82583378c44ceb026102d6bae/razredi/523573"
+			schedule := getWeeklySchedule(url)
+			return c.JSON(schedule)
+		})
+	*/
+
+	app.Listen(":3000")
+
 	// subtract 1 because today on index 0 would be Sunday
 
 	//TODO: separate two-subject classes
