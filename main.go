@@ -3,14 +3,20 @@ package main
 import (
 	"buzzy-backend/models"
 	"buzzy-backend/utils"
+	"context"
+	"fmt"
 	"log"
 	"net/url"
 	"strings"
 	"time"
 
+	firebase "firebase.google.com/go"
+	"firebase.google.com/go/messaging"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jasonlvhit/gocron"
+	"google.golang.org/api/option"
 )
 
 func getWeeklySchedule(url string) models.WeeklySchedule { //TODO: add string classURL as parameter
@@ -131,26 +137,73 @@ func urlDecode(classURL string) string {
 	return query
 }
 
+var firebaseContext context.Context
+var client *messaging.Client
+
+func initFireBase() {
+	firebaseContext = context.Background()
+	opt := option.WithCredentialsFile("firebase_sdk.json")
+	config := &firebase.Config{ProjectID: "my-project-id"}
+	app, err := firebase.NewApp(firebaseContext, config, opt)
+	if err != nil {
+		log.Fatalf("error initializing app: %v\n", err)
+	}
+	client, _ = app.Messaging(context.Background())
+
+}
+
+func sendNotification(nextClass models.ClassSubject, client *messaging.Client) {
+	topic := "nextClass"
+	message := &messaging.Message{
+		Data: map[string]string{
+			"className": nextClass.ClassName,
+			"classroom": nextClass.Classroom,
+			"professor": nextClass.Professor,
+		},
+		Topic: topic,
+	}
+	// Send a message to the devices subscribed to the provided topic.
+	response, err := client.Send(firebaseContext, message)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	// Response is a message ID string.
+	fmt.Println("Successfully sent message:", response)
+}
+
+func pushNotificationTimer(dailySchedule models.DailySchedule) {
+	classes := dailySchedule.DailySchedule
+	pushTimeOffset := time.Minute * 10
+	for _, class := range classes {
+		timeUntilNotification := time.Until(class.ClassDuration.StartTime) - pushTimeOffset
+		time.AfterFunc(timeUntilNotification, func() { sendNotification(class, client) })
+	}
+}
+
 func main() {
+	initFireBase()
 	app := fiber.New()
+
+	classURLs := []string{}
+	var schedule models.WeeklySchedule
+
 	app.Get("/schedule/:value", func(c *fiber.Ctx) error {
 		classURL := urlDecode(c.Params("value"))
+		classURLs = append(classURLs, classURL)
 		schedule := getWeeklySchedule(classURL)
 		return c.JSON(schedule)
 	})
 
-	/*
-		app.Get("/", func(c *fiber.Ctx) error {
-			url := "https://www.easistent.com/urniki/5738623c4f3588f82583378c44ceb026102d6bae/razredi/523573"
-			schedule := getWeeklySchedule(url)
-			return c.JSON(schedule)
-		})
-	*/
+	gocron.Every(1).Day().At("5:00").Do(func() {
+		if time.Now().Weekday() == time.Sunday || time.Now().Weekday() == time.Saturday {
+			return
+		}
 
+		for _, classURL := range classURLs {
+			schedule = getWeeklySchedule(classURL)
+			pushNotificationTimer(schedule.WeeklySchedule[time.Now().Weekday()-1])
+		}
+	})
+	gocron.Start()
 	app.Listen(":3000")
-
-	// subtract 1 because today on index 0 would be Sunday
-
-	//TODO: separate two-subject classes
-
 }

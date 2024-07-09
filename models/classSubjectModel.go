@@ -22,6 +22,7 @@ const (
 	OdpadlaUra
 	VecSkupin
 	Dogodek
+	Pocitnice
 )
 
 var classStatusMap = map[string]ClassStatus{
@@ -30,10 +31,11 @@ var classStatusMap = map[string]ClassStatus{
 	"Odpadla ura":  OdpadlaUra,
 	"Več skupin":   VecSkupin,
 	"Dogodek":      Dogodek,
+	"Šolski koledar": Pocitnice,
 }
 
 func (status ClassStatus) String() string {
-	return [...]string{"Nadomeščanje", "Zaposlitev", "Odpadla ura", "Več skupin", "Dogodek"}[status]
+	return [...]string{"Nadomeščanje", "Zaposlitev", "Odpadla ura", "Več skupin", "Dogodek", "Šolski koledar"}[status]
 }
 
 func ParseClassStatus(status string) (ClassStatus, error) {
