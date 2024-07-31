@@ -19,7 +19,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-func getWeeklySchedule(url string) models.WeeklySchedule { //TODO: add string classURL as parameter
+func getWeeklySchedule(url string) models.WeeklySchedule {
 
 	collector := colly.NewCollector()
 
@@ -98,7 +98,7 @@ func getDailySchedule(element *colly.HTMLElement, dayOfTheWeekIndex int, duratio
 
 						var status *models.ClassStatus = nil
 						if exists {
-							status = utils.SetClassStatus(title)
+							status = utils.SetClassStatus(title)			
 						}
 						if subjectProfessorAndRoom != "" {
 							professor = strings.TrimSpace(strings.Split(subjectProfessorAndRoom, ", ")[0])

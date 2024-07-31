@@ -9,15 +9,15 @@ import (
 func GetWeekdayName(weekdayIndex int) string {
 	switch weekdayIndex {
 	case 1:
-		return "Monday"
+		return "Ponedeljek"
 	case 2:
-		return "Tuesday"
+		return "Torek"
 	case 3:
-		return "Wednesday"
+		return "Sreda"
 	case 4:
-		return "Thursday"
+		return "Četrtek"
 	case 5:
-		return "Friday"
+		return "Petek"
 	}
 	return ""
 }

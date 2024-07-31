@@ -26,11 +26,11 @@ const (
 )
 
 var classStatusMap = map[string]ClassStatus{
-	"Nadomeščanje": Nadomescanje,
-	"Zaposlitev":   Zaposlitev,
-	"Odpadla ura":  OdpadlaUra,
-	"Več skupin":   VecSkupin,
-	"Dogodek":      Dogodek,
+	"Nadomeščanje":   Nadomescanje,
+	"Zaposlitev":     Zaposlitev,
+	"Odpadla ura":    OdpadlaUra,
+	"Več skupin":     VecSkupin,
+	"Dogodek":        Dogodek,
 	"Šolski koledar": Pocitnice,
 }
 
@@ -42,7 +42,7 @@ func ParseClassStatus(status string) (ClassStatus, error) {
 	if val, ok := classStatusMap[status]; ok {
 		return val, nil
 	}
-	return 0, errors.New("invalid OrderStatus: " + status)
+	return 0, errors.New("invalid classStatus: " + status)
 }
 
 func PrintSubjectInfo(classSubject ClassSubject, classSubjectDuration string, statusInt *ClassStatus) string {
