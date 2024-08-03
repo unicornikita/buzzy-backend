@@ -41,6 +41,7 @@ func PrintDailySchedule(schedule models.DailySchedule) {
 		if ds.ClassStatusInt != nil {
 			status = ds.ClassStatusInt
 		} else {
+
 			status = nil
 		}
 		fmt.Print(models.PrintSubjectInfo(ds, FormatDurationPrint(ds.ClassDuration), status))
