@@ -52,7 +52,10 @@ func getClassTimes(element *colly.HTMLElement) []models.ClassDuration {
 	element.ForEach(".ednevnik-seznam_ur_teden-td.ednevnik-seznam_ur_teden-ura", func(i int, classTime *colly.HTMLElement) {
 		if !strings.Contains(classTime.Text, "Čas pred poukom") && !strings.Contains(classTime.Text, "Čas po pouku") {
 			durationText = strings.Split(classTime.ChildText(".text10.gray"), " - ")
-			var startTime = "0" + durationText[0]
+			var startTime = durationText[0]
+			if len(strings.Split(durationText[0], ":")[0]) == 1 {
+				startTime = "0" + durationText[0]
+			}
 			var endTime = durationText[1]
 			parsedStartTime, _ := time.Parse("15:04", startTime)
 			parsedEndTime, _ := time.Parse("15:04", endTime)
@@ -84,12 +87,10 @@ func getDailySchedule(element *colly.HTMLElement, dayOfTheWeekIndex int, duratio
 				if s == dayOfTheWeekIndex {
 
 					subjectChildren := subject.Children()
-					fmt.Print(subjectChildren.First())
 
 					if subjectChildren.Length() == 0 {
 						emptySubject := models.ClassSubject{ClassName: "", Classroom: "", Professor: "", ClassDuration: durations[i-1], ClassStatusInt: nil}
 						schedule = append(schedule, emptySubject)
-						fmt.Println("added empty subject: ", emptySubject.ClassName)
 						return
 					}
 
@@ -107,7 +108,6 @@ func getDailySchedule(element *colly.HTMLElement, dayOfTheWeekIndex int, duratio
 							status = utils.SetClassStatus(title)
 							if *status == models.Pocitnice || *status == models.Dogodek {
 								schedule = append(schedule, models.ClassSubject{ClassName: subjectName, Classroom: "", Professor: "", ClassDuration: durations[i-1], ClassStatusInt: status})
-								fmt.Println("added event subject: ", subjectName)
 								hasBeenProcessed = true
 								return
 							}
@@ -133,7 +133,6 @@ func getDailySchedule(element *colly.HTMLElement, dayOfTheWeekIndex int, duratio
 					}
 
 					schedule = append(schedule, primarySubject)
-					fmt.Println("added subject to schedule: ", primarySubject.ClassName)
 				}
 
 			}
