@@ -158,7 +158,7 @@ var client *messaging.Client
 func initFireBase() {
 	firebaseContext = context.Background()
 	opt := option.WithCredentialsFile("firebase_sdk.json")
-	config := &firebase.Config{ProjectID: "my-project-id"}
+	config := &firebase.Config{ProjectID: "buzzy-diploma"}
 	app, err := firebase.NewApp(firebaseContext, config, opt)
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
@@ -167,15 +167,19 @@ func initFireBase() {
 
 }
 
-func sendNotification(nextClass models.ClassSubject, client *messaging.Client) {
-	topic := "nextClass"
+func sendNotification(nextClass models.ClassSubject, client *messaging.Client, classURL string) {
+	classUrlSplit := strings.Split(classURL, "/")
+	classCode := classUrlSplit[len(classUrlSplit)-1]
+	topic := "nextClass" + classCode
 	message := &messaging.Message{
-		Data: map[string]string{
-			"className": nextClass.ClassName,
-			"classroom": nextClass.Classroom,
-			"professor": nextClass.Professor,
+		Notification: &messaging.Notification{
+			Title: nextClass.ClassName + ", " + nextClass.Classroom,
+			Body:  nextClass.Professor,
 		},
 		Topic: topic,
+		Android: &messaging.AndroidConfig{
+			Priority: "high",
+		},
 	}
 	// Send a message to the devices subscribed to the provided topic.
 	response, err := client.Send(firebaseContext, message)
@@ -186,12 +190,12 @@ func sendNotification(nextClass models.ClassSubject, client *messaging.Client) {
 	fmt.Println("Successfully sent message:", response)
 }
 
-func pushNotificationTimer(dailySchedule models.DailySchedule) {
+func pushNotificationTimer(dailySchedule models.DailySchedule, classURL string) {
 	classes := dailySchedule.DailySchedule
 	pushTimeOffset := time.Minute * 10
 	for _, class := range classes {
 		timeUntilNotification := time.Until(class.ClassDuration.StartTime) - pushTimeOffset
-		time.AfterFunc(timeUntilNotification, func() { sendNotification(class, client) })
+		time.AfterFunc(timeUntilNotification, func() { sendNotification(class, client, classURL) })
 	}
 }
 
@@ -216,7 +220,7 @@ func main() {
 
 		for _, classURL := range classURLs {
 			schedule = getWeeklySchedule(classURL)
-			pushNotificationTimer(schedule.WeeklySchedule[time.Now().Weekday()-1])
+			pushNotificationTimer(schedule.WeeklySchedule[time.Now().Weekday()-1], classURL)
 		}
 	})
 	gocron.Start()
