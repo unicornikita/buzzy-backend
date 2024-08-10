@@ -39,6 +39,7 @@ func getWeeklySchedule(url string) models.WeeklySchedule {
 	})
 
 	collector.Visit(url)
+	collector.Wait()
 
 	return weeklySchedule
 
