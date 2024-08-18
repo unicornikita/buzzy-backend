@@ -26,15 +26,15 @@ func getWeeklySchedule(url string) models.WeeklySchedule {
 	var weeklySchedule = models.WeeklySchedule{}
 
 	collector.OnHTML(".ednevnik-seznam_ur_teden", func(tableOfClasses *colly.HTMLElement) {
-		dailySchedule := []models.DailySchedule{}
+		dailySchedules := []models.DailySchedule{}
 
 		var classTimes = getClassTimes(tableOfClasses)
 		// start on 1 because the .Weekday() has Sunday on index 0
 		for dayOfTheWeekIndex := 1; dayOfTheWeekIndex < 6; dayOfTheWeekIndex++ {
-			dailySchedule = append(dailySchedule, getDailySchedule(tableOfClasses, dayOfTheWeekIndex, classTimes))
+			dailySchedules = append(dailySchedules, getDailySchedule(tableOfClasses, dayOfTheWeekIndex, classTimes))
 		}
 
-		weeklySchedule.WeeklySchedule = dailySchedule
+		weeklySchedule.WeeklySchedule = dailySchedules
 		//utils.PrintWeeklySchedule(weeklySchedule)
 	})
 
@@ -116,6 +116,7 @@ func getDailySchedule(element *colly.HTMLElement, dayOfTheWeekIndex int, duratio
 						if subjectProfessorAndRoom != "" {
 							professor = strings.TrimSpace(strings.Split(subjectProfessorAndRoom, ", ")[0])
 							room = strings.TrimSpace(strings.Split(subjectProfessorAndRoom, ", ")[1])
+							room = strings.Join(strings.Fields(room), " ")
 							selectedSubject := models.ClassSubject{ClassName: subjectName, Classroom: room, Professor: professor, ClassDuration: durations[i-1], ClassStatusInt: status}
 
 							if isFirst {
@@ -165,7 +166,6 @@ func initFireBase() {
 		log.Fatalf("error initializing app: %v\n", err)
 	}
 	client, _ = app.Messaging(context.Background())
-
 }
 
 func sendNotification(nextClass models.ClassSubject, client *messaging.Client, classURL string) {
