@@ -194,8 +194,19 @@ func sendNotification(nextClass models.ClassSubject, client *messaging.Client, c
 func pushNotificationTimer(dailySchedule models.DailySchedule, classURL string) {
 	classes := dailySchedule.DailySchedule
 	pushTimeOffset := time.Minute * 10
+	today := time.Now()
 	for _, class := range classes {
-		timeUntilNotification := time.Until(class.ClassDuration.StartTime) - pushTimeOffset
+		classTime := time.Date(
+			today.Year(),
+			today.Month(),
+			today.Day(),
+			class.ClassDuration.StartTime.Hour(),
+			class.ClassDuration.StartTime.Minute(),
+			int(0),
+			int(0),
+			today.Location(),
+		)
+		timeUntilNotification := time.Until(classTime) - pushTimeOffset
 		time.AfterFunc(timeUntilNotification, func() { sendNotification(class, client, classURL) })
 	}
 }
@@ -224,6 +235,7 @@ func main() {
 			pushNotificationTimer(schedule.WeeklySchedule[time.Now().Weekday()-1], classURL)
 		}
 	})
+
 	gocron.Start()
 	app.Listen(":3000")
 }
