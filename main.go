@@ -207,7 +207,10 @@ func pushNotificationTimer(dailySchedule models.DailySchedule, classURL string) 
 			today.Location(),
 		)
 		timeUntilNotification := time.Until(classTime) - pushTimeOffset
-		time.AfterFunc(timeUntilNotification, func() { sendNotification(class, client, classURL) })
+		if timeUntilNotification > 0 {
+			fmt.Println("time until notification: ", timeUntilNotification)
+			time.AfterFunc(timeUntilNotification, func() { sendNotification(class, client, classURL) })
+		}
 	}
 }
 
@@ -225,14 +228,18 @@ func main() {
 		return c.JSON(schedule)
 	})
 
-	gocron.Every(1).Day().At("5:00").Do(func() {
+	gocron.Every(1).Day().At("05:00").Do(func() {
 		if time.Now().Weekday() == time.Sunday || time.Now().Weekday() == time.Saturday {
 			return
 		}
 
-		for _, classURL := range classURLs {
-			schedule = getWeeklySchedule(classURL)
-			pushNotificationTimer(schedule.WeeklySchedule[time.Now().Weekday()-1], classURL)
+		if len(classURLs) != 0 {
+			for _, classURL := range classURLs {
+				go func(url string) {
+					schedule = getWeeklySchedule(url)
+					pushNotificationTimer(schedule.WeeklySchedule[time.Now().Weekday()-1], url)
+				}(classURL)
+			}
 		}
 	})
 
