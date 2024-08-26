@@ -194,7 +194,7 @@ func sendNotification(nextClass models.ClassSubject, client *messaging.Client, c
 func pushNotificationTimer(dailySchedule models.DailySchedule, classURL string) {
 	classes := dailySchedule.DailySchedule
 	pushTimeOffset := time.Minute * 10
-	today := time.Now()
+	today := time.Now().In(loc)
 	for _, class := range classes {
 		classTime := time.Date(
 			today.Year(),
@@ -204,7 +204,7 @@ func pushNotificationTimer(dailySchedule models.DailySchedule, classURL string) 
 			class.ClassDuration.StartTime.Minute(),
 			int(0),
 			int(0),
-			today.Location(),
+			loc,
 		)
 		timeUntilNotification := time.Until(classTime) - pushTimeOffset
 		if timeUntilNotification > 0 {
@@ -214,12 +214,16 @@ func pushNotificationTimer(dailySchedule models.DailySchedule, classURL string) 
 	}
 }
 
+var loc *time.Location
+
 func main() {
 	initFireBase()
 	app := fiber.New()
 
 	classURLs := []string{}
 	var schedule models.WeeklySchedule
+
+	loc, _ = time.LoadLocation("Europe/Ljubljana")
 
 	app.Get("/schedule/:value", func(c *fiber.Ctx) error {
 		classURL := urlDecode(c.Params("value"))
