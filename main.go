@@ -208,7 +208,6 @@ func pushNotificationTimer(dailySchedule models.DailySchedule, classURL string) 
 		)
 		timeUntilNotification := time.Until(classTime) - pushTimeOffset
 		if timeUntilNotification > 0 {
-			fmt.Println("time until notification: ", timeUntilNotification)
 			time.AfterFunc(timeUntilNotification, func() { sendNotification(class, client, classURL) })
 		}
 	}
@@ -241,7 +240,9 @@ func main() {
 			for _, classURL := range classURLs {
 				go func(url string) {
 					schedule = getWeeklySchedule(url)
-					pushNotificationTimer(schedule.WeeklySchedule[time.Now().Weekday()-1], url)
+					if len(schedule.WeeklySchedule) != 0 {
+						pushNotificationTimer(schedule.WeeklySchedule[time.Now().Weekday()-1], url)
+					}
 				}(classURL)
 			}
 		}
